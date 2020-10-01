@@ -1,0 +1,221 @@
+---
+title: "UFSCar-ACIEPE"
+subtitle: "Análise e visualização de dados do coronavírus usando R."
+author: "Sergio Lima"
+date: "Sep 28, 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r install, include=FALSE}
+#install.packages("knitr")
+#install.packages("rmarkdown")
+#install.packages("dplyr")
+#install.packages("tidyverse", dependencies = TRUE)
+#install.packages("caTools")
+
+library(knitr)
+library(rmarkdown)
+library(dplyr)
+library(tidyverse)
+library(caTools)
+
+setwd("/home/sergio/Desktop")
+```
+
+## Homework 01
+***
+
+#### 1) Faca algumas operacoes matemáticas com os operadores listados na aula 1. 
+   * Escolha pelo menos tres operadores distintos. 
+   * Faca tambem 3 combinacoes distintas entre os operadores.
+
+```{r}
+# Operadores Matemáticos
+# Soma +
+1 + 2
+```
+
+```{r}
+# Multiplicação *
+2 * 3
+```
+
+```{r}
+# Resto da divisão %%
+10 %% 3
+```
+
+***
+#### 2) Suponha que um pesquisador tenha criado o pacote chamado Brasil. 
+* Que comando voce utilizaria para instalar tal pacote? 
+```{r}
+# install.packages("Brasil")
+```
+* Que comando voce utilizaria para carregar tal pacote?
+```{r}
+# library(Brasil)
+```
+* Suponha que dentro deste pacote Brasil tenha a funcao SP. 
+* Como voce acabou de instalar este pacote, ainda nao esta familiarizado com os termos desta nova funcao. 
+* De que forma voce poderia descobrir como utilizar este comando dentro do R? 
+```{r}
+# help("Brasil.SP") ### aparece um quadro explicativo ao lado direito do RStudio.
+# Exemplo: help("print.default")
+```
+* E fora do R? (Voce pode fazer uma pesquisa para responder essa questao).   
+```{r}
+# https://www.rdocumentation.org/
+```
+
+
+***
+#### 3) Como e' possıvel criar um chunk de codigo no R markdown? 
+```{r}
+# ```{r}
+#   codigo R aqui 
+# ```
+```
+* Quais as opcoes para usar knit? (Faca uma pesquisa para responder essa questao, 
+* ou use o card Rmarkdown disponibilizado no AVA - Moodle).
+```{r}
+# INLINE CODE
+# O resultado aparece como texto sem o codigo R.
+# Exemplo:
+#   Versao do R `r getRversion()` ==> Versao do R 3.6.1
+```
+Versao do R `r getRversion()`
+```{r}
+# CODE CHUNKS
+# Uma ou mais linhas cercadas por ```{r} e ```
+# Exemplo:
+#   ```{r echo=TRUE}
+#      Versao do R getRversion() ==> Versao do R 3.6.1
+#   ```
+```
+Versao do R 
+```{r echo=FALSE}
+  getRversion()
+```
+```{r}
+## GLOBAL OPTIONS
+# Atribuir knitr::opts_chunk$set()
+# Exemplo:
+# ```{r include=FALSE} 
+#   knitr::opts_chunk$set(echo = TRUE)
+# ```
+```
+***
+#### 4) Teste qual a diferenca entre criar um vetor usando a funcao c() e c(””).
+```{r}
+# Cria um vetor com cinco elementos numericos:
+c(1,4,6,8,10)
+# Cria um vetor com cinco elementos tipo caracter:
+c("1","4","6","8","10")
+```
+
+
+***
+#### 5) Crie um vetor de todos numeros inteiros maiores do que 1 e menores do que 1000. 
+```{r}
+c(2:999)
+```
+* Em seguida, crie um vetor com as mesmas caracterısticas, contendo apenas numeros pares.
+* Dica: obviamente nao espero que voce digite elemento por elemento.
+```{r}
+seq(from=2, to=999, by=2)
+```
+
+***
+#### 6) Calcule o numero de ouro no R. Dica: o numero de ouro e' dado pela expressao: 
+$$ \frac{ 1 + \sqrt{5} } {2} $$
+```{r}
+(1 + sqrt(5)) / 2
+```
+
+***
+#### 7) Qual o resultado da divisao de 1 por 0 no R?
+
+```{r}
+1 / 0
+```
+*  E de -1 por 0?
+```{r}
+-1 / 0
+```
+
+***
+#### 8) Verifique quais as diferencas entre NaN, NULL, NA e Inf?
+*  Digite expressoes que retornem cada um desses resultados.
+```{r}
+# fonte: https://www.curso-r.com/material/r-base/
+# NA
+# NA (Not Available) significa dado faltante/indisponível. É o null do SQL.
+# ou seja, podemos ter NA numeric, NA character etc.
+as.numeric (c("1", "2", "three", "4"))   # Illegal conversion
+
+# NaN
+# NaN (Not a Number) representa indefinições matemáticas, como 0/0 e log(-1). 
+# Um NaN é um NA, mas a recíproca não é verdadeira.
+0 / 0
+# Inf
+# Inf (Infinito) é um número muito grande ou o limite matemático, por exemplo, 
+# 1/0 e 10^310. Aceita sinal negativo -Inf.
+1/0
+# NULL
+# NULL representa a ausência de informação. Conceitualmente, a diferença 
+# entre NA e NULL é sutil, mas, no R, o NA está mais alinhado com os 
+# conceitos de estatística (ou como gostaríamos que os dados faltantes se 
+# comportassem em análise de dados) e o NULL está em sintonia com 
+# comportamentos de lógica de programação.
+f <- function() if(FALSE) 1
+print(f())
+
+```
+
+```{r}
+```
+
+
+***
+#### 9) Verifique o que retorna a expressao 5 + 3 * 10 %/%3 == 15 retorna no R.
+```{r}
+5 + 3 * 10 %/%3 == 15
+```
+* Faca a expressao retornar o valor contrario apenas usando parenteses
+* ou seja, se a expressao retornar originariamente TRUE, faca retornar FALSE.
+```{r}
+5 + (3 * 10) %/%3 == 15
+```
+* Explique o que faz a expressao original 5 + 3 * 10 %/%3.
++ 1o. 
+```{r}
+10 %/% 3
+```
++ 2o. 
+```{r}
+3 * 3
+```
++ 3o. 
+```{r}
+5 + 9
+```
+
+***
+#### 10) Escreva um loop que itere os numeros de 1 a 7 e imprima o cubo de cada numero, usando print().
+```{r}
+print((1:7)^3)
+```
+
+
+***
+#### 11) Verifique qual e' seu atual diretorio de trabalho com o comando getwd(). 
+* Lembre-se que para mudar o diretorioo, voce deve usar setwd(”caminho da pasta escolhida”).
+```{r}
+getwd()
+```
+
+***
