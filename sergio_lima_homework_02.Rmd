@@ -1,0 +1,405 @@
+---
+title: "UFSCar-ACIEPE"
+subtitle: "Análise e visualização de dados do coronavírus usando R."
+author: "Sergio Lima"
+date: "Oct 14, 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r install, include=FALSE}
+#install.packages("knitr")
+#install.packages("rmarkdown")
+#install.packages("dplyr")
+#install.packages("tidyverse", dependencies = TRUE)
+#install.packages("caTools")
+#install.packages{"ggplot2"}
+#install.packages('ggthemes')
+#install.packages('ggrepel')
+
+library(knitr)
+library(rmarkdown)
+library(dplyr)
+library(tidyverse)
+library(caTools)
+library(ggplot2)
+library(ggthemes)
+library(ggrepel)
+setwd("/home/sergio/Desktop")
+```
+
+## Homework 02
+***
+
+#### 1) Utilizando o conjunto de dados USArrests descrito na aula
+* Construa um histograma para cada uma das variaveis contidas nesse banco de dados. 
+* Use uma cor diferente para cada histograma. 
+* Construa tambem box-plots para cada uma das variaveis, com as mesmas cores usadas no histograma.
+
+
+```{r}
+# Carregar dataset USArrests
+data(USArrests)
+usa_arrest_dataset = USArrests
+# Quantas variaveis existem neste dataset?
+# linhas e colunas
+dim(usa_arrest_dataset) 
+# nomes das variáveis
+names(usa_arrest_dataset) 
+```
+
+* Histograma para variavel Murder
+```{r}
+ggplot(usa_arrest_dataset) +
+geom_histogram(mapping = aes(x = Murder), bins = 10, fill ='goldenrod4') +
+labs(x = 'Assassinato para cada 100 mil habitantes',
+y = 'Frequencia',
+title = 'Assassinato em Estados Americanos')
+```
+
+* Diagrama de caixa ou box-plot (quartis da distribuição, onde podemos analisar a dispersão da variável)
+```{r}
+ggplot(data = usa_arrest_dataset) +
+geom_boxplot(mapping = aes(x = 1, y = Murder), color = 'red', fill = 'goldenrod4')
+```
+
+
+* Histograma para variavel Assault
+```{r}
+ggplot(usa_arrest_dataset) +
+geom_histogram(mapping = aes(x = Assault), bins = 10, fill ='goldenrod3') +
+labs(x = 'Assalto para cada 100 mil habitantes',
+y = 'Frequencia',
+title = 'Assalto em Estados Americanos')
+```
+
+* Diagrama de caixa ou box-plot (quartis da distribuição, onde podemos analisar a dispersão da variável)
+```{r}
+ggplot(data = usa_arrest_dataset) +
+geom_boxplot(mapping = aes(x = 1, y = Assault), color = 'red', fill = 'goldenrod3')
+```
+
+* Histograma para variavel UrbanPop
+```{r}
+ggplot(usa_arrest_dataset) +
+geom_histogram(mapping = aes(x = UrbanPop), bins = 10, fill ='goldenrod2') +
+labs(x = 'Pop.Urbana para cada 100 mil habitantes',
+y = 'Frequencia',
+title = 'Pop.Urbana em Estados Americanos')
+```
+
+* Diagrama de caixa ou box-plot (quartis da distribuição, onde podemos analisar a dispersão da variável)
+```{r}
+ggplot(data = usa_arrest_dataset) +
+geom_boxplot(mapping = aes(x = 1, y = UrbanPop), color = 'red', fill = 'goldenrod2')
+```
+
+
+* Histograma para variavel Rape
+```{r}
+ggplot(usa_arrest_dataset) +
+geom_histogram(mapping = aes(x = Rape), bins = 10, fill ='goldenrod1') +
+labs(x = 'Estupro para cada 100 mil habitantes',
+y = 'Frequencia',
+title = 'Estupro em Estados Americanos')
+```
+
+* Diagrama de caixa ou box-plot (quartis da distribuição, onde podemos analisar a dispersão da variável)
+```{r}
+ggplot(data = usa_arrest_dataset) +
+geom_boxplot(mapping = aes(x = 1, y = Rape), color = 'red', fill = 'goldenrod1')
+```
+
+
+#### 2) Escolha duas variaveis do banco de dados para fazer um diagrama de dispersao (scatterplot), usando geom point.
+* Acrescente uma linha relacionando as duas variaveis para ajudar na interpretacao. 
+* Descreva o fenomeno que voce quer analisar com esse diagrama.
+
+Gráfico de dispersão (scatterplot) com geom_point.
+Verificar como o nível de estupros se relaciona com o tamanho da população urbana. 
+
+```{r}
+ggplot(usa_arrest_dataset, aes(x = Rape, y = UrbanPop)) +
+geom_point(mapping = aes(x = Rape), color='blue', size=4) +
+  labs(y = "Estupros",
+    x = "População Urbana",
+    title = "Relação entre Estupros e População Urbana") +
+geom_smooth(se = FALSE, method = "lm") # <-- geom_smooth para acrescentar uma linha no grafico
+```
+
+#### 3) Utilizando a função data() do R, escolha um conjunto de dados de sua preferencia 
+* Crie 4 gráficos, a sua escolha, usando as variáveis deste banco de dados. 
+* Faça uma breve interpretação de seus achados.
+```{r}
+# Carregar dataset mpg.
+# Dados de economia de combustível de 1999 a 2008 para 38 modelos populares de carros
+# Contém apenas modelos que tiveram um novo lançamento a cada ano entre 1999 e 2008.
+# isso foi usado como um proxy para a popularidade do carro.
+data(mpg)
+mpg_dataset = mpg
+# Quantas variaveis existem neste dataset?
+# linhas e colunas
+dim(mpg_dataset) 
+# nomes das variáveis
+names(mpg_dataset) 
+```
+
+* 4 gráficos usando as variáveis deste banco de dados.
+* Breve Interpretacao: 
+*   O gráfico mostra uma possível relação negativa entre eficiência (milhas por galao na cidade) e cilindradas.
+
+```{r}
+ggplot(mpg_dataset, aes(x = displ, y = cty)) + 
+geom_point(mapping = aes(x = displ), color = 'lightblue', size = 3) + 
+labs(y = "Milhas por Galao na Cidade",
+  x = "Cilindradas",
+  title = "Relação entre Cilindradas e Milhas por Galao na Cidade") + 
+geom_smooth(se = FALSE, method = "lm")  # <-- geom_smooth para acrescentar uma linha no grafico
+```
+
+```{r}
+ggplot(mpg_dataset, aes(x = displ, y = cty)) + 
+geom_line(mapping = aes(x = displ), color = 'lightblue', size = 3) + 
+labs(y = "Milhas por Galao na Cidade",
+  x = "Cilindradas",
+  title = "Relação entre Cilindradas e Milhas por Galao na Cidade") + 
+geom_smooth(se = FALSE, method = "lm")  # <-- geom_smooth para acrescentar uma linha no grafico
+```
+
+```{r}
+ggplot(mpg_dataset) + 
+geom_histogram(mapping = aes(x = displ), bins = 6, fill =rainbow(6), color='black') + 
+labs(y = "Milhas por Galao na Cidade",
+  x = "Cilindradas",
+  title = "Relação entre Cilindradas e Milhas por Galao na Cidade")
+```
+
+```{r}
+ggplot(mpg_dataset) +
+geom_density(mapping = aes(x = displ), kernel = 'gaussian') +
+labs(y = "Milhas por Galao na Cidade",
+  x = "Cilindradas",
+  title = "Relação entre Cilindradas e Milhas por Galao na Cidade")
+```
+
+#### 4) Considerando o banco de dados utilizado no exercicio anterior, escolha duas variaveis para analisar via diagrama de dispersao.
+* Comente brevemente seus achados.
+
+* Dispersão: geom_point()
+* O gráfico mostra uma possível relação negativa entre gasto de combustivel na cidade e cilindradas.
+* Quanto maior e' a cilindrada do veiculo, menor e' o consumo na cidade.
+
+```{r}
+ggplot(mpg_dataset, aes(x = displ, y = cty)) + 
+geom_point(mapping = aes(x = displ), color = 'lightblue', size = 3) + 
+labs(y = "Milhas por Galao na Cidade",
+  x = "Cilindradas",
+  title = "Relação entre Cilindradas e Milhas por Galao na Cidade")
+```
+
+#### 5) Utilize o comando ?mpg e descreva as variaveis contidas neste banco de dados. 
+* Faca um analise preliminar deste banco de dados usando os comando head, tail, etc (como fizemos para USArrests).
+
+
+```{r}
+?mpg
+```
+
+
+* Analise preliminar deste banco de dados:
+```{r}
+mpg_dataset = mpg
+str(mpg_dataset) # amostra de valores
+dim(mpg_dataset) # dimensao (linhas e colunas)
+head(mpg_dataset) # seis primeiras linhas
+tail(mpg_dataset) # seis últimas linhas
+summary(mpg_dataset) # sumário estatístico 
+names(mpg_dataset) # nomes das variáveis
+```
+
+#### 6) Faça um gráfico de dispersão entre as variáveis hwy e cyl.
+* Mude a cor do tema. Interprete os resultados.
+
+* Gráfico de dispersão (scatterplot) com geom_point.
+* Verificar numero de cilindros dos veiculos por desempenho na estrada.
+
+```{r}
+ggplot(mpg_dataset, aes(x = cyl, y = hwy)) +
+geom_point(mapping = aes(x = cyl), color='blue', size=4) +
+labs(y = "Desempenho (milhas por galao) na estrada",
+x = "Numero de cilindros do veiculo",
+title = "Relação de numero de cilindros VS desempenho na estrada") +
+geom_smooth(se = FALSE, method = "lm") + # <-- geom_smooth para acrescentar uma linha no grafico
+theme_dark()
+```
+
+
+#### 7) Escolha duas variáveis do banco de dados e construa histograma e box-plot para elas.
+* Personalize os gráficos usando cores diferentes do default. 
+* Não se esqueça de dar nomes para os eixos, bem como um título para os gráficos. 
+* Organize os gráficos em subplots usando grid.arrange(). 
+* Note que:
+*   teremos 2 histogramas e 2 boxplots,
+*   totalizando 4 gráficos que vc deve plotar em duas colunas.
+
+```{r}
+#install.packages("gridExtra")
+library(gridExtra)
+```
+
+* 4 gráficos
+
+```{r}
+histogran_01 <- ggplot(mpg_dataset) + 
+  geom_histogram(mapping = aes(x = displ), fill = 'darkolivegreen4', color='black') +
+  labs(x = 'Cilindradas',
+       y = 'Quantidade',
+       title = 'Cilindrada do motor em litros')
+
+box_plot_01 <- ggplot(mpg_dataset) +
+  geom_boxplot(mapping = aes(x = 1, y = displ), fill = 'darkolivegreen4', color='black') +
+  labs(y = 'Cilindradas',
+       title = 'Cilindrada do motor em litros')
+
+histogran_02 <- ggplot(mpg_dataset) + 
+  geom_histogram(mapping = aes(x = cty), fill = 'lightcoral', color='black') +
+  labs(x = 'Milhas por Galao',
+       y = 'Quantidade',
+       title = 'Consumo dos Veiculos na cidade')
+
+box_plot_02 <- ggplot(mpg_dataset) +
+  geom_boxplot(mapping = aes(x = 1, y = cty), fill = 'lightcoral', color='black') +
+  labs(y = 'Milhas por Galao',
+       title = 'Consumo dos Veiculos na cidade')
+
+grid.arrange(histogran_01, box_plot_01, histogran_02, box_plot_02, ncol = 2)
+```
+
+#### 8) Usando o arquivo de dados mpg ainda, vamos agora treinar o uso do recurso facets. 
+* 1 - Faça gráficos de dispersão entre displ e hwy separados para cada classe de veículos. 
+* Use color = class para diferenciar por cor e 
+* facet_wrap(~ class, nrow = 2) para obter os subplots. 
+
+```{r}
+ggplot(mpg_dataset) + 
+  geom_point(mapping = aes(x = displ, y = hwy, color = class)) + 
+  facet_wrap(~ class, nrow = 2)
+```
+
+* 2 - Agora vamos criar subplots com base em duas variáveis: número de cilindros (cyl) e tipo de direção (drv). 
+* Diferencie por cor usando color=drv e utilize facet_grid(drv ∼ cyl). 
+* Algumas facetas ficarão vazias por não possuírem combinações de drv e cyl. 
+
+```{r}
+ggplot(mpg_dataset) + 
+  geom_point(mapping = aes(x = drv, y = cyl, color = drv)) + 
+  facet_grid(drv ~ cyl)
+```
+
+* 3 Explique o que ocorre se você usar color=cyl para classifcar por cilindros (cyl) e facet_grid(. ∼ cyl)
+
+* Resposta: desta forma, o grafico criou legenda por cyl (cilindros) e nao criou divisoes no grafico por drv.
+
+```{r}
+ggplot(mpg_dataset) + 
+  geom_point(mapping = aes(x = drv, y = cyl, color = cyl)) + 
+  facet_grid(. ~ cyl)
+```
+
+
+#### 9) Corrupção x desenvolvimento humano Para realizar este exercício, usaremos um banco de dados disponibilizado na página do nosso curso (homework3.xls). Para carregar este conjunto de dados no R, execute os seguintes comandos: 
+
+```{r}
+library(readxl)
+homework2 = read_excel("homework2.xlsx")
+```
+
+* Lembre-se de salvar o arquivo na pasta usada como diretório do R. 
+* Os dados dizem respeito basicamente ao indice de desenvolvimento humano (HDI) e percepção da corrupção (CPI) 
+
+a.	Construa um diagrama de dispersão entre as variáveis CPI (eixo x) e HDI (eixo y). Coloque a cor vermelha nos pontos. 
+```{r}
+ggplot(homework2, aes(y = as.numeric(HDI),  x = as.numeric(CPI))) +
+  geom_point(color = 'red') 
+```
+
+b.	Agora diferencie a cor dos pontos por região. 
+```{r}
+ggplot(homework2, aes(y = as.numeric(HDI),  x = as.numeric(CPI))) +
+  geom_point(aes(color = Region)) 
+```
+
+c.	Faça um gráfico com pontos maiores (size =3). 
+```{r}
+ggplot(homework2, aes(y = as.numeric(HDI),  x = as.numeric(CPI))) +
+  geom_point(aes(color = Region, size = 3)) 
+```
+
+d.	Faça um gráfico em que o tamanho dos pontos dependa da variável HDI.
+```{r}
+ggplot(homework2, aes(y = as.numeric(HDI),  x = as.numeric(CPI))) +
+  geom_point(aes(color = Region, size = as.numeric(HDI))) 
+```
+
+e.	Inclua nomes nos eixos x e y, um título para o seu gráfico bem como legendas que julgar necessárias. 
+```{r}
+ggplot(homework2, aes(y = as.numeric(HDI),  x = as.numeric(CPI))) +
+  geom_point(aes(color = Region, size = as.numeric(HDI)))  +
+  labs(y = "Indice de Desenvolvimento Humano (HDI)",
+    x = "Percepção da corrupção (CPI)",
+    title = "Relação entre Corrupção x Desenvolvimento Humano") 
+```
+
+f.  Desafio 
+* O gráfico abaixo foi publicado na revista The Economist e utiliza os dados contidos no arquivo que estamos usando. 
+* Escreva um código no R usando ggplot que replica tão próximo quanto possível o gráfico em questão. 
+```{r}
+x_title = expression (paste(italic("Corruption Perceptions Index, 2011 (10=least corrupt)")))
+y_title = expression (paste(italic("Human Development Index, 2011 (1=best)")))
+title   = expression (paste(bold("Corruption and human development")))
+region_colors = c("darkgreen", "dodgerblue2","deepskyblue", "darkseagreen4", "darkorange1", "darkorange4")
+region_names  = c("OECD", "Americas","Asia & Oceania", "Central & Eastern Europe", "Middle East & north Africa", "Sub-Saharan Africa")
+# Select specific countries
+pointsToLabel <- c("Russia", "Venezuela", "Iraq", "Myanmar", "Sudan",
+                   "Afghanistan", "Congo", "Greece", "Argentina", "Brazil",
+                   "India", "Italy", "China", "South Africa", "Spane",
+                   "Botswana", "Cape Verde", "Bhutan", "Rwanda", "France",
+                   "United States", "Germany", "Britain", "Barbados", "Norway", "Japan", "New Zealand", "Singapore", "Cuba")
+
+ggplot(homework2, mapping = aes(y = as.numeric(HDI),  x = as.numeric(CPI))) +
+  geom_point(aes(color = Region), fill="white", pch=21, size=2, stroke=1.5) +
+  labs(y = y_title,
+       x = x_title,
+       title = title)  +
+  theme_hc() +
+  geom_text_repel(aes(label = Country), color = 'gray20',
+                       data=subset(homework2, Country %in% pointsToLabel),
+                       check_overlap = TRUE) +
+  theme(legend.position = "top", axis.title.y = element_text(size = 10), legend.box = "horizontal") + 
+  scale_linetype_manual(name = "", values = c("R²=56%" = "solid")) +
+  scale_y_continuous(limits = c(0.2,1), breaks =seq(0.2,1,0.1)) +
+  scale_x_continuous(limits = c(1,10), breaks =seq(1,10,1)) +  
+  scale_color_manual(name = "", values = region_colors, labels = region_names) +
+  geom_smooth(se = FALSE, method = "lm", aes(linetype = "R²=56%"), color="red", formula = y ~ log(x))  # <-- geom_smooth para acrescentar uma linha no grafico
+
+```
+
+
+f.  Desafio (comecou assim...)
+* O gráfico abaixo foi publicado na revista The Economist e utiliza os dados contidos no arquivo que estamos usando. 
+* Escreva um código no R usando ggplot que replica tão próximo quanto possível o gráfico em questão. 
+```{r}
+
+ggplot(homework2, mapping = aes(y = as.numeric(HDI),  x = as.numeric(CPI))) +
+  geom_point(aes(color = Region)) +
+  geom_smooth(se = FALSE, method = "lm", color="red")
+
+```
+
+
+***
+
+
