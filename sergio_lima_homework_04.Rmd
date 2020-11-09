@@ -1,0 +1,105 @@
+---
+title: "UFSCar-ACIEPE"
+subtitle: "Análise e visualização de dados do coronavírus usando R."
+author: "Sergio Lima"
+date: "Oct 20, 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+#install.packages('nycflights13')
+library(nycflights13)
+library(dplyr)
+setwd("/home/sergio/Desktop")
+```
+
+## Homework 03 - Manipulação/Transformação de dados usando dplyr
+***
+
+#### 1) Utilizando o mesmo conjunto de dados para flights usado na aula, encontre todos os vôos que: 
+a) Tiveram um atraso na chegada (arrival) de duas horas ou mais. 
+b) Voaram com destino a Houston (IAH ou HOU) 
+c) Foram realizados pelas companhias aéreas United, American ou Delta Airlines. 
+d) Partiram no verão (julho, agosto e setembro). 
+e) Não partiram atrasados, porém chegaram com mais de duas horas de atraso ao destino. 
+f) Partiram entre meia noite e 6 h da manhã (inclusive). 
+
+
+```{r}
+# a) Vôos que tiveram um atraso na chegada (arrival) de duas horas ou mais.
+select(filter(flights, arr_delay >= 120), mes = month, dia = day, partida_horario = dep_time, partida_horario_programado = sched_dep_time, partida_atraso = dep_delay, chegada_horario = arr_time, chegada_horario_programado = sched_arr_time, chegada_atraso = arr_delay)
+```
+```{r}
+# b) Voos com destino a Houston (IAH ou HOU) 
+select(filter(flights, dest == 'IAH' | dest == 'HOU'),  dest, mes = month, dia = day, partida_horario = dep_time, partida_horario_programado = sched_dep_time, partida_atraso = dep_delay, chegada_horario = arr_time, chegada_horario_programado = sched_arr_time, chegada_atraso = arr_delay)
+```
+
+```{r}
+# c) Voos realizados pelas companhias aéreas United, American ou Delta Airlines. 
+# 'United Air Lines Inc.' UA| 'American Airlines Inc.' AA | 'Delta Air Lines Inc.' DL
+select(filter(flights, carrier == 'UA' | carrier == 'AA' | carrier == 'DL'),  aerea = carrier, dest, mes = month, dia = day, partida_horario = dep_time, partida_horario_programado = sched_dep_time, partida_atraso = dep_delay, chegada_horario = arr_time, chegada_horario_programado = sched_arr_time, chegada_atraso = arr_delay)
+```
+
+```{r}
+# d) Voos que partiram no verão (julho, agosto e setembro). 
+select(filter(flights, month == 7 | month == 8 | month == 9), aerea = carrier, dest, mes = month, dia = day, partida_horario = dep_time, partida_horario_programado = sched_dep_time, partida_atraso = dep_delay, chegada_horario = arr_time, chegada_horario_programado = sched_arr_time, chegada_atraso = arr_delay)
+```
+
+```{r}
+# e) Voos que não partiram atrasados, porém chegaram com mais de duas horas de atraso ao destino.
+select(filter(flights, dep_delay <= 0 & arr_delay > 120), partida_horario = dep_time, partida_horario_programado = sched_dep_time, partida_atraso = dep_delay, chegada_horario = arr_time, chegada_horario_programado = sched_arr_time, chegada_atraso = arr_delay)
+```
+
+```{r}
+# f) Voos que partiram entre meia noite e 6 h da manhã (inclusive). 
+select(filter(flights, dep_time == 2400 | dep_time <= 600), partida_horario = dep_time, partida_horario_programado = sched_dep_time, partida_atraso = dep_delay, chegada_horario = arr_time, chegada_horario_programado = sched_arr_time, chegada_atraso = arr_delay)
+```
+
+#### 2) Classifique os vôos para encontrar os vôos mais atrasados. 
+```{r}
+select(arrange(flights, desc(dep_delay, arr_delay)), partida_horario = dep_time, partida_horario_programado = sched_dep_time, partida_atraso = dep_delay, chegada_horario = arr_time, chegada_horario_programado = sched_arr_time, chegada_atraso = arr_delay)
+```
+
+
+#### 3) Classifique os vôos de forma a encontrar os mais rápidos (velocidade mais alta). 
+```{r}
+arrange(select(mutate(flights, velocidade = distance / air_time * 60), distance, air_time, velocidade), desc(velocidade))
+```
+
+
+#### 4) O que acontece se você incluir o nome de uma variável várias vezes dentro de select()? 
+```{r}
+# Se incluir nome de uma variável várias vezes dentro de select(), o select() nao repete a coluna, considera apenas uma coluna para a variavel repetida.
+select(flights, distance, distance, air_time, air_time, air_time)
+```
+
+#### 5) Encontre os 10 vôos mais atrados usando arrange() e a função min_rank(). Leia a documentação de min_rank() para aprender sobre ele. 
+
+```{r}
+select(arrange(flights, min_rank(desc(dep_delay))), partida_horario = dep_time, partida_horario_programado = sched_dep_time, partida_atraso = dep_delay, chegada_horario = arr_time, chegada_horario_programado = sched_arr_time, chegada_atraso = arr_delay)
+```
+
+#### 6) Usando mutate() crie uma coluna com a média da variável tempo em ar (air time). Você vai obter uma nova coluna de constante com a variável desejada. 
+```{r}
+select(mutate(flights, media_tempo_em_ar = mean(air_time, na.rm = TRUE)), air_time, media_tempo_em_ar)
+```
+
+#### 7) Verifique a coluna com dep_time. Ela não fornece uma variável em tempo contínuo. Converta essa coluna para uma representação mais apropriada de número de minutos a partir da meia-noite. 
+```{r}
+select(mutate(flights, dep_time_in_minutes = (dep_time %/% 100 * 60) + (dep_time %% 100)), dep_time, dep_time_in_minutes)
+```
+
+#### 8) Verifique qual companhia aérea tem os piores atrasos. 
+```{r}
+atrasos_dataset <- group_by(flights, carrier)
+summarise(atrasos_dataset, piores_atrasos = max(dep_delay, na.rm = TRUE), .groups = "keep")
+```
+
+
+***
+
+

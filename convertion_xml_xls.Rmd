@@ -1,0 +1,35 @@
+---
+title: "Untitled"
+author: "Sergio Lima"
+date: "11/1/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r, message = FALSE, warning = FALSE, echo = FALSE}
+#################### Carregar pacotes ####################
+if(!require(XML))
+  install.packages("XML")
+library(XML)
+
+if(!require(methods))
+  install.packages("methods")
+library(methods)
+
+if(!require(writexl))
+  install.packages("writexl")
+library(writexl)
+```
+
+```{r}
+# To convert the data in xml file to a data frame
+xmlRdataframe <- xmlToDataFrame("acumulo_01out.xml")
+print(xmlRdataframe)
+
+write_xlsx(xmlRdataframe,"acumulo_01out.xlsx")
+```
+
+

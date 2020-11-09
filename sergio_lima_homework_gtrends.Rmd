@@ -1,0 +1,168 @@
+---
+title: "UFSCar-ACIEPE"
+subtitle: "Curso Análise e visualização de dados do coronavírus usando R."
+author: "Sergio Lima"
+date: "Oct 29, 2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+***
+
+### Análise e visualização de dados usando gtrendsR
+
+***
+
+O **Google Trends** é uma ferramenta do google que mostra o volume de pesquisa de determinadas palavras em relação ao total de pesquisa. 
+
+Neste estudo, vamos analisar itens de consumo que aumentaram durante a pandemia. 
+
+Como forma de proteção, as pessoas ficaram mais em seus lares, assim, itens que proporcionam mais conforto foram mais consumidos:
+
+i) pijama
+ii) moleton
+iii) roupa de cama
+iv) pantufas
+
+***
+
+```{r, message = FALSE, warning = FALSE, echo = FALSE}
+#################### Carregar pacotes ####################
+if(!require(gtrendsR))
+  install.packages("gtrendsR")
+library(gtrendsR)
+
+if(!require(dplyr))
+  install.packages("dplyr")
+library(dplyr)
+
+if(!require(ggplot2))
+  install.packages("ggplot2")
+library(ggplot2)
+
+if(!require(patchwork))
+  install.packages("patchwork")
+library(patchwork)
+```
+
+Para fins de comparação, vamos usar a seguinte data de ***inicio da pandemia no Brasil***:
+```{r}
+inicio_da_quarentena = "2020-03-10"
+```
+
+```{r, echo = FALSE}
+pijama_keyword = "pijama"
+moleton_keyword = "moleton"
+roupa_keyword = "roupa de cama"
+pantufas_keyword = "pantufas"
+```
+
+### Vamos procurar primeiro pelo termo "pijama" no Brasil. 
+
+```{r echo = TRUE}
+################# Carregar base de dados ################
+pijama = gtrends(c(pijama_keyword), geo = c("BR"), time = "all")
+```
+
+
+```{r echo = FALSE, eval = FALSE}
+############### Visualizar base de dados ###############
+View(pijama)
+str(pijama)
+names(pijama)
+summary(pijama)
+```
+
+### Podemos plotar diretamente os resultados usando a função plot:
+
+```{r, echo = TRUE}
+plot(pijama)
+```
+
+### Agora, vamos fazer o mesmo gráfico usando ggplot. 
+
+```{r, echo = TRUE}
+time_trend = pijama$interest_over_time
+plot <-
+  ggplot(data = time_trend, aes(
+    x = date,
+    y = hits,
+    group = keyword,
+    col = keyword
+  )) +
+  geom_line() + xlab('Time') + ylab('Interesse relativo') + theme_bw() +
+  theme(
+    legend.title = element_blank(),
+    legend.position = "bottom",
+    legend.text = element_text(size = 12)
+  ) + ggtitle("Volume de Busca no Google")
+plot
+```
+
+### Fica claro que o item deu um salto durante a pandemia. 
+
+#### Vamos limitar a busca somente para o ano de 2020.
+
+```{r, echo = TRUE}
+pijama <- gtrends(c(pijama_keyword), geo = c("BR"), time = "2020-01-01 2020-10-25")
+plot(pijama)
+```
+
+#### Incluindo agora o ano de 2019 para comparação.
+
+```{r, echo = TRUE}
+pijama <- gtrends(c(pijama_keyword), geo = c("BR"), time = "2019-01-01 2020-10-25")
+plot(pijama)
+```
+
+### Com base nos itens abaixo, analisando agora o comportamento de compra das pessoas desde o inicio da pandemia:
+
+i) pijama
+ii) moleton
+iii) roupa de cama
+iv) pantufas
+
+
+```{r}
+# função adaptada de Michael - Casual Inference
+plot_trend = function(keyword_string) {
+  data =
+    gtrends(c(keyword_string), time = "2020-01-01 2020-10-25", geo = "BR")
+  time_trend = data$interest_over_time %>%
+    mutate(
+      hits = ifelse(hits == "<1", 0.5, hits),
+      date = as.Date(date),
+      keyword = factor(keyword, levels = keyword_string)
+    )
+  plot =
+    ggplot(data = time_trend, aes(
+      x = date,
+      y = as.numeric(hits),
+      colour = keyword
+    )) +
+    geom_line() +
+    geom_vline(xintercept = as.numeric(as.Date(inicio_da_quarentena))) +
+    theme_bw() +
+    scale_y_continuous(breaks = NULL) +
+    theme(
+      legend.position = "bottom",
+      legend.title = element_blank(),
+      legend.text = element_text(size = 10),
+      axis.title.x = element_blank(),
+      axis.title.y = element_blank()
+    )
+  return(plot)
+}
+```
+
+
+```{r}
+pijama_plot = plot_trend(keyword_string = c(pijama_keyword))
+moleton_plot = plot_trend(keyword_string = c(moleton_keyword))
+roupa_plot = plot_trend(keyword_string = c(roupa_keyword))
+patufas_plot = plot_trend(keyword_string = c(pantufas_keyword))
+(pijama_plot + moleton_plot) / (roupa_plot + patufas_plot)
+```

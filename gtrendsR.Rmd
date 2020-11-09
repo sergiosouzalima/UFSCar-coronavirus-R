@@ -1,0 +1,255 @@
+---
+title: "Google Trends no R"
+author: "Andreza Palma"
+date: "20/09/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+O **Google Trends** é uma ferramenta do google que mostra o volume de pesquisa de determinadas palavras em relação ao total de pesquisa. 
+
+O resultado é um índice de 0 a 100 e quanto mais próximo de 100, maior o interesse pela palavra. 
+
+Neste estudo, vamos analisar itens de consumo que aumentaram durante a pandemia. 
+
+Como forma de proteção, as pessoas ficaram mais em seus lares, assim, itens que proporcionam mais conforto foram mais consumidos:
+
+i) pijamas
+ii) moleton
+iii) roupa de cama
+iv) pantufas
+
+As seguintes bibliotecas são usadas neste estudo:
+
+i) gtrendsR
+ii) tidyverse (especificamente ggplot2 e dplyr) 
+
+
+```{r, message = FALSE, warning = FALSE}
+#################### Carregar pacotes ####################
+if(!require(gtrendsR))
+  install.packages("gtrendsR")
+library(gtrendsR)
+
+if(!require(dplyr))
+  install.packages("dplyr")
+library(dplyr)
+
+if(!require(ggplot2))
+  install.packages("ggplot2")
+library(ggplot2)
+
+if(!require(patchwork))
+  install.packages("patchwork")
+library(patchwork)
+```
+
+
+```{r, echo=FALSE}
+# install.packages("gtrendsR")
+#library(gtrendsR)
+#library(ggplot2)
+#library(dplyr)
+```
+
+Cabe notar que existem **3 elementos essenciais** para a função gtrends:
+
+i) palavra ou frase de interesse (keyword)
+ii) região de interesse (geo)
+iii) período de tempo de interesse
+
+
+Vamos procurar primeiro pelas buscas por seguro-desempregro no Brasil. Vejamos através do exemplo abaixo. Note que, de acordo com a explicação acima,  precisamos definir a palavra buscada (seguro-desemprego), a região de interesse, no caso, Brasil (geo=c("BR")) e o período desejado (nesse caso, queremos todo o período disponível - time = 'all').
+
+```{r}
+segurodesemprego <- gtrends(c("seguro-desemprego"), geo = c("BR"), time = "all")
+```
+
+Podemos plotar diretamente os resultados usando a função plot:
+
+```{r}
+plot(segurodesemprego)
+```
+
+Agora, vamos fazer o mesmo gráfico usando ggplot. 
+
+```{r}
+time_trend=segurodesemprego$interest_over_time
+plot<-ggplot(data=time_trend, aes(x=date, y=hits,group=keyword,col=keyword))+
+        geom_line()+xlab('Time')+ylab('Interesse relativo')+ theme_bw()+
+        theme(legend.title = element_blank(),legend.position="bottom",legend.text=element_text(size=12))+ggtitle("Volume de Busca no Google")
+plot
+```
+
+Como podemos notar, a busca pela palavra seguro-desemprego deu um salto no período recente. Poderíamos limitar a nossa busca somente ao ano de 2020. Basta mudar time = all para time "2020-01-01 2020-06-14" Vejamos.
+
+```{r}
+segurodesemprego2 <- gtrends(c("seguro-desemprego"), geo = c("BR"), time = "2020-01-01 2020-06-14")
+plot(segurodesemprego2)
+```
+
+E podemos comparar com o mesmo período do ano passado:
+
+```{r}
+segurodesemprego3 <- gtrends(c("seguro-desemprego"), geo = c("BR"), time = "2019-01-01 2019-06-14")
+plot(segurodesemprego3)
+```
+
+
+Vamos verificar agora as buscas pela palavra coronavirus no Brasil e fazer o gráfico.
+
+```{r}
+corona <- gtrends("coronavirus",
+                geo = "BR",
+                time = "all")
+plot(corona)
+
+```
+
+
+Vamos agora pesquisar um conjunto de palavras: coronavirus e hidroxicloroquina;
+
+```{r}
+corona2 =  gtrends(c("coronavirus", "hidroxicloroquina"), geo = c("BR"), time = 'all')
+plot(corona2)
+
+```
+
+
+Feito de outra forma,  acrescentando a palavra ivermectina a nossa busca e restringindo o período para a partir de 2015: 
+
+```{r}
+#definindo as palavras que serão buscadas
+keywords=c("Coronavirus","hidroxicloroquina","ivermectina")
+#REgião geográfica: Brasil
+country=c('BR')
+#Escolhendo o período de tempo:
+time=("2015-01-01 2020-06-14")
+
+trends = gtrends(keywords, geo=country, time = time )
+#selecionando apenas a colula com o interesse ao longo do tempo 
+time_trend=trends$interest_over_time
+#para ver as 6 primeiras linhas, usamos head()
+head(time_trend)
+```
+
+Gráfico:
+
+```{r}
+ plot(trends)
+```
+
+Existem várias outras funcionalidades que você deve explorar no pacote gtrendsR. Por exemplo, podemos buscar as palavras nas últimas horas usando time = "now 4-H":
+
+```{r}
+trends2 = gtrends(keywords, geo=country, time = "now 4-H"  )
+plot(trends2)
+```
+
+Abaixo algumas opções para time:
+
+* Code	   Período de tempo;
+
+* now 1-H   última hora;
+
+* now 4-H	  últimas quatro horas;
+
+* now 1-d	  último dia; 
+
+* today 1-m	30 dias;
+
+* today 3-m	90 dias;
+
+* today 12-m	últimos 12 meses;
+
+* today+5-y	 ultimo 5 anos (default);
+
+* all	      desde o início do google trends (2004);
+
+* Y-m-d Y-m-d	 período entre as datas (ex.: “2010-01-01 2020-04-03”)
+
+
+##################################################################
+
+Vamos procurar agora pelas buscas por bitcoin:
+
+```{r}
+ trends = gtrends(c("bitcoin"))
+ plot(trends)
+```
+
+Acho que já ficou bastante claro como funciona gtrendsR e a grande variedade de informação que pode nos proporcionar.
+
+Vamos agora fazer coisas um pouco mais complicadas. Para isso vamos instalar e carregar o pacote **patchwork** que permite manipular vários gráficos. 
+
+```{r}
+#install.packages("patchwork")
+#library(patchwork)
+```
+
+Vamos fazer uma busca por algumas palavras durante a pandemia no google trends. Para isso, vamos criar uma função (adaptada do Michael, do Casual inference), que vai facilitar a elaboração dos nossos gráficos. Essa função será plot_trend, com o argumento keyword_string. Vejamos abaixo.  
+
+```{r}
+#função adaptada de Michael - Casual Inference
+#função para plotar os gráficos a partir de gtrends, para o período de janeiro de 2020 a junho de 2020.
+#nós vamos inserir uma linha vertical próximo a data de início da "quarentena", usando geom_vline no dia 10 de março de 2020. 
+plot_trend<-function(keyword_string){
+data<-gtrends(c(keyword_string), time= "2020-01-01 2020-06-14", geo = "BR")
+time_trend<-data$interest_over_time %>%
+  mutate(hits=ifelse(hits=="<1",0.5,hits),
+         date=as.Date(date),
+         keyword=factor(keyword, levels = keyword_string))
+plot<-ggplot(data=time_trend, aes(x=date, y=as.numeric(hits), colour=keyword)) +
+  geom_line() +
+  geom_vline(xintercept = as.numeric(as.Date("2020-03-10"))) +
+  theme_bw() +
+  scale_y_continuous(breaks = NULL) +
+  theme(legend.position = "bottom",
+        legend.title = element_blank(),
+        legend.text=element_text(size=10),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank())
+return(plot)
+}
+```
+
+A função acima irá nos ajudar a fazer os gráficos mais rapidamente. Vamos procurar os termos "como cortar o cabelo", como fazer pão, como fazer café e treino em casa, a fim de verificar se houve alguma mudança nas buscas a partir da pandemia. 
+
+```{r}
+cabelo_plot<-plot_trend(keyword_string = c( "como cortar o cabelo"))
+comida_plot<-plot_trend(keyword_string = c("como fazer pão"))
+fitness_plot<-plot_trend(keyword_string = c("treino em casa"))
+coffee_plot<-plot_trend(keyword_string = c("como fazer café"))
+
+(cabelo_plot + comida_plot) / (fitness_plot + coffee_plot)
+```
+
+Os esportes também foram afetados. Então vamos ver como estão as buscas pelos times Palmeiras e Corinthians. 
+
+```{r}
+futebol_plot<-plot_trend(keyword_string = c("Palmeiras","Corinthians"))
+futebol_plot
+```
+
+E como várias pessoas estão em home-office, usando videoconferência, podemos ver como estão as buscas por notebook e as ferramentas zoom, skype e google meet. 
+
+```{r}
+homeoffice_plot<-plot_trend(keyword_string = c("notebook"))
+video_plot<-plot_trend(keyword_string = c("zoom","skype","Google Meet"))
+(homeoffice_plot)/(video_plot) 
+```
+
+E será que a procura pelo termo netflix aumentou? Vejamos:
+
+```{r}
+netflix_plot<-plot_trend(keyword_string = c("netflix"))
+netflix_plot
+
+```
+
+Aproveitem e qualquer dúvida, postem no fórum de dúvidas. 
+Abraços virtuais
+Profa. Andreza
